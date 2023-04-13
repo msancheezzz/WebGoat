@@ -55,18 +55,16 @@ public class Assignment5 extends AssignmentEndpoint {
       return failed(this).feedback("user.not.larry").feedbackArgs(username_login).build();
     }
     try (var connection = dataSource.getConnection()) {
-      String query = "SELECT password FROM challenge_users WHERE userid = :username AND password = :password";
-      int a = 1;
-      int b = 2;
-      PreparedStatement statement = connection.prepareStatement(query);
-      statement.setString(a, username_login);
-      statement.setString(b, password_login);
-      ResultSet resultSet = statement.executeQuery();
-
-      if (resultSet.next()) {
-        return success(this).feedback("challenge.solved").feedbackArgs(flags.getFlag(5)).build();
-      } else {
-        return failed(this).feedback("challenge.close").build();
+      String query = "SELECT password FROM challenge_users WHERE userid = ? AND password = ?";
+      try(PreparedStatement statement = connection.prepareStatement(query)){
+          statement.setString(1, username_login);
+          statement.setString(2, password_login);
+          ResultSet resultSet = statement.executeQuery();
+          if (resultSet.next()) {
+              return success(this).feedback("challenge.solved").feedbackArgs(flags.getFlag(5)).build();
+          } else {
+              return failed(this).feedback("challenge.close").build();
+          }
       }
     }
   }
